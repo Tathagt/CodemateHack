@@ -1,4 +1,3 @@
-
 import os
 import re
 import subprocess
@@ -11,24 +10,23 @@ from flask_cors import CORS
 import psutil
 import openai
 
-
 IS_WINDOWS = platform.system() == "Windows"
 if not IS_WINDOWS:
     import pty
     import select
 
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 app = Flask(__name__, static_folder='.')
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent_uwsgi')
+
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 
 
 openai.api_key = os.getenv("OPENAI_API_KEY", "YOUR_OPENAI_API_KEY")
+
 
 user_session = { 'current_directory': os.getcwd() }
 
@@ -204,3 +202,7 @@ def handle_command(data: dict):
     if IS_WINDOWS: _execute_command_windows(command)
     else: _execute_command_unix(command)
 
+
+if __name__ == '__main__':
+    logging.info("Starting Flask-SocketIO server for local testing...")
+    socketio.run(app, port=5000, debug=True)

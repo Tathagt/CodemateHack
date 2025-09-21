@@ -1,0 +1,6 @@
+Flask-SocketIO
+psutil
+openai
+flask-cors
+gunicorn
+gevent-websocket
