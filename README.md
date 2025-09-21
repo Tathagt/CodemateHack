@@ -1,9 +1,9 @@
-Visual Command Center
+**Visual Command Center**
 A real-time, AI-powered web terminal built for the CodeMate Hackathon (Problem Statement 1).
 
 The Visual Command Center is a modern, web-based terminal that not only executes standard system commands but also provides a rich, interactive user experience with live system monitoring and an intelligent command translation engine. Built with a robust Python backend and a sleek, responsive frontend, this project demonstrates a unique approach to a classic tool.
 
-✨ Features
+**Features**
 This project meets and exceeds all the requirements of the hackathon's "Python-Based Command Terminal" problem statement.
 
 Real-Time Terminal: A fully functioning terminal that streams command output instantly using WebSockets.
@@ -24,21 +24,21 @@ Command History: Easily navigate through previous commands using the up and down
 
 Clean & Responsive UI: A modern interface built with Tailwind CSS that looks great on any device.
 
-🛠️ Tech Stack
+**Tech Stack**
 Backend: Python, Flask, Flask-SocketIO, psutil, OpenAI
 
 Frontend: HTML, Tailwind CSS, Vanilla JavaScript, Chart.js, Socket.IO Client
 
 Core Technologies: WebSockets, Pseudo-terminals (pty)
 
-📂 Project Structure
+**Project Structure**
 The project is contained within two self-sufficient files for simplicity and easy deployment.
 
 /visual-command-center/
 ├── backend.py        # The Python backend server (Flask, SocketIO, AI logic)
 └── index.html        # The single-file frontend (HTML, CSS, JS, UI logic)
 
-🚀 Local Setup & Installation
+**Local Setup & Installation**
 To run the Visual Command Center on your local machine, follow these steps:
 
 1. Clone the Repository
@@ -77,7 +77,7 @@ Open your web browser and navigate to: http://127.0.0.1:5000
 
 The Visual Command Center should load and be ready to use.
 
-💡 How to Use
+**How to Use**
 Standard Commands: Type any standard command for your operating system (dir, ls, echo "hello", etc.) and press Enter.
 
 AI Mode:
@@ -89,5 +89,6 @@ Type a natural language query (e.g., "create a file named report.txt with the te
 Press Enter. The AI will translate your query into a command, display it, and then execute it.
 
 Remember to toggle AI Mode OFF to run standard commands again.
+
 
 Command History: Use the Up Arrow and Down Arrow keys to cycle through your command history.
