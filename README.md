@@ -15,7 +15,7 @@ This project meets and exceeds all the requirements of the hackathon's "Python-B
 * Hybrid AI Engine:
   * Live AI Mode: Uses the OpenAI API to translate any complex natural language query into an executable command.
   * Intelligent Offline AI: A powerful, rule-based parser acts as a fallback, allowing for a full-featured demo without requiring a paid API key. It can handle multi-step commands and context.
-* Full File & Directory Operations: Supports all standard commands (dir, ls, cd, mkdir, rm, move, copy, etc.)
+* Full File & Directory Operations: Supports all standard commands (dir, ls, cd, mkdir, rm, move, copy, etc.).
 * Command History: Easily navigate through previous commands using the up and down arrow keys.
 * Clean & Responsive UI: A modern interface built with Tailwind CSS that looks great on any device.
 
