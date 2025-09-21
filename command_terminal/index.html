@@ -1,276 +1,191 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-gray-900">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visual Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-dark: #1a1b26;
-            --bg-med: #24283b;
-            --bg-light: #414868;
-            --fg-main: #c0caf5;
-            --fg-comment: #565f89;
-            --accent-purple: #bb9af7;
-            --accent-blue: #7aa2f7;
-            --accent-red: #f7768e;
-            --accent-green: #9ece6a;
-        }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); }
-        .font-mono { font-family: 'Fira Code', monospace; }
-
-        
-        .prompt-user { color: var(--accent-green); }
-        .prompt-cwd { color: var(--accent-purple); }
-        .error { color: var(--accent-red); }
-        #terminal-input { background: transparent; border: none; outline: none; caret-color: var(--fg-main); }
-        #output pre { white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; }
-        .ai-toggle.active { background-color: var(--accent-blue); color: var(--bg-dark); box-shadow: 0 0 10px var(--accent-blue); }
-
-        
-        @keyframes pulse {
-            50% { opacity: 0.85; }
-        }
-        .chart-pulse { animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-
-        
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--bg-light); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--fg-comment); }
+        body { font-family: 'Inter', sans-serif; }
+        .terminal-font { font-family: 'Fira Code', monospace; }
+        #terminal-output::-webkit-scrollbar { width: 8px; }
+        #terminal-output::-webkit-scrollbar-track { background: #111827; }
+        #terminal-output::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        #terminal-output::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        .chart-container { position: relative; height: 120px; width: 100%; }
+        .ai-glow { box-shadow: 0 0 15px 5px rgba(34, 197, 94, 0.4); }
     </style>
 </head>
-<body class="text-[var(--fg-main)]">
+<body class="h-full flex flex-col md:flex-row text-gray-200">
 
-    <div class="flex h-screen">
-        
-        <aside class="w-64 bg-[var(--bg-med)] p-4 border-r border-[var(--bg-light)] flex flex-col space-y-6">
-            <h2 class="text-xl font-bold text-center text-white">System Monitor</h2>
+   
+    <aside class="w-full md:w-64 bg-gray-900 p-4 border-b md:border-b-0 md:border-r border-gray-700 flex-shrink-0">
+        <h2 class="text-xl font-bold mb-4 text-white">System Monitor</h2>
+        <div class="space-y-6">
             <div>
-                <h3 class="font-semibold mb-2 text-sm">CPU Usage (%)</h3>
-                <div class="relative chart-pulse">
-                    <canvas id="cpuChart" aria-label="CPU Usage Chart" role="img"></canvas>
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-lg font-semibold text-blue-400">CPU</h3>
+                    <p id="cpu-usage" class="text-lg font-mono">0%</p>
                 </div>
+                <div class="chart-container mt-2"><canvas id="cpu-chart"></canvas></div>
             </div>
             <div>
-                <h3 class="font-semibold mb-2 text-sm">Memory Usage (%)</h3>
-                <div class="relative chart-pulse">
-                    <canvas id="memoryChart" aria-label="Memory Usage Chart" role="img"></canvas>
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-lg font-semibold text-green-400">Memory</h3>
+                    <p id="mem-usage" class="text-lg font-mono">0%</p>
                 </div>
+                <div class="chart-container mt-2"><canvas id="mem-chart"></canvas></div>
             </div>
-            <div class="mt-auto text-center text-xs text-[var(--fg-comment)]">
-                <p class="font-semibold">Visual Command Center</p>
-                <p>#SRMHacksWithCodemate</p>
-            </div>
-        </aside>
+        </div>
+    </aside>
 
-        
-        <main class="flex-1 flex flex-col bg-[var(--bg-dark)]">
-            <div id="terminal-container" class="w-full h-full flex flex-col font-mono p-4">
-                <div class="flex justify-between items-center pb-2 border-b border-[var(--bg-light)]">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                        <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
-                        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                    </div>
-                    <span class="text-sm text-[var(--fg-comment)]">user: anonymous</span>
-                     <button id="ai-toggle" class="ai-toggle text-xs font-bold py-1 px-3 rounded-md transition-all duration-200 bg-[var(--bg-light)] border border-[var(--accent-blue)]" title="Toggle AI Natural Language Mode (Ctrl+A)">
-                        AI Mode: OFF
-                    </button>
-                </div>
-
-                <div id="output" class="flex-grow overflow-y-auto text-sm pt-2" aria-live="polite">
-                    
-                </div>
-                
-                <div id="input-line" class="flex items-center pt-2 mt-auto">
-                    <span class="prompt-user">user@vcc</span>
-                    <span class="mx-1 text-[var(--fg-comment)]">:</span>
-                    <span class="prompt-cwd" id="cwd">~</span>
-                    <span class="mr-2">$</span>
-                    <input type="text" id="terminal-input" class="flex-1 w-full disabled:opacity-50" autocomplete="off" spellcheck="false" aria-label="Command Input">
-                </div>
-            </div>
-        </main>
-    </div>
+    
+    <main class="flex-1 flex flex-col bg-gray-800 h-full overflow-hidden">
+        <div id="terminal-output" class="flex-1 p-4 overflow-y-auto terminal-font text-sm leading-6"></div>
+        <div class="p-4 bg-gray-900 border-t border-gray-700 flex items-center">
+            <span id="cwd-prompt" class="text-blue-400 font-semibold mr-2 terminal-font"></span>
+            <span class="text-green-400 font-semibold mr-2 terminal-font">&gt;</span>
+            <input type="text" id="command-input" class="flex-1 bg-transparent text-gray-200 focus:outline-none terminal-font" autofocus autocomplete="off">
+            <button id="ai-toggle" class="ml-4 px-3 py-1.5 text-sm font-semibold rounded-md bg-gray-600 hover:bg-gray-500 transition-all duration-200 focus:outline-none">
+                AI Mode: OFF
+            </button>
+        </div>
+    </main>
 
     <script>
-        
-        const commandHistory = [];
-        let historyIndex = -1;
-        let isAiMode = false;
-        
-      
-        const outputEl = document.getElementById('output');
-        const inputEl = document.getElementById('terminal-input');
-        const cwdEl = document.getElementById('cwd');
-        const aiToggleBtn = document.getElementById('ai-toggle');
-
-        
-        const socket = io('http://127.0.0.1:5000');
-
-        socket.on('connect', () => {
-            console.log('Successfully connected to the backend.');
-            inputEl.disabled = false;
-            inputEl.placeholder = '';
-            inputEl.focus();
-        });
-
-        socket.on('disconnect', () => {
-            console.error('Connection to backend lost.');
-            appendOutput('Error: Disconnected from server. Please restart the backend and refresh.', 'error');
-            inputEl.disabled = true;
-            inputEl.placeholder = 'CONNECTION LOST';
-        });
-
-        
-        socket.on('command_output', (data) => appendStream(data));
-        socket.on('command_error', (data) => appendOutput(data, 'error'));
-        socket.on('cwd_update', (newCwd) => { cwdEl.textContent = sanitize(newCwd); });
-        socket.on('command_done', () => { 
-            inputEl.disabled = false; 
-            inputEl.focus();
+        document.addEventListener('DOMContentLoaded', function() {
             
-            const newPre = document.createElement('pre');
-            newPre.dataset.streamTarget = 'true';
-            outputEl.appendChild(newPre);
-        });
-        socket.on('system_stats', (data) => updateCharts(data));
-        
-        
-        inputEl.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !inputEl.disabled) {
-                e.preventDefault();
-                const command = inputEl.value.trim();
-                
-                if (command === 'clear' || (e.key === 'l' && e.ctrlKey)) {
-                    clearTerminal();
-                    inputEl.value = '';
-                    return;
-                }
+            const BACKEND_URL = "http://127.0.0.1:5000"; 
+            const socket = io(BACKEND_URL);
 
-                if (command) {
-                    addToHistory(command);
-                    displayEnteredCommand(command);
-                    socket.emit('execute_command', { command, ai: isAiMode });
-                    inputEl.value = '';
-                    inputEl.disabled = true;
-                }
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault(); navigateHistory(1);
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault(); navigateHistory(-1);
-            } else if (e.key === 'a' && e.ctrlKey) {
-                e.preventDefault();
-                toggleAiMode();
-            }
-        });
-        
-        aiToggleBtn.addEventListener('click', toggleAiMode);
+            const output = document.getElementById('terminal-output');
+            const input = document.getElementById('command-input');
+            const cwdPrompt = document.getElementById('cwd-prompt');
+            const aiToggle = document.getElementById('ai-toggle');
+            
+            let commandHistory = [];
+            let historyIndex = -1;
+            let isAiMode = false;
 
-        
-        const sanitize = (str) => {
-            const temp = document.createElement('div');
-            temp.textContent = str;
-            return temp.innerHTML;
-        };
+            
+            const createChart = (ctx, label, color) => {
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Array(30).fill(''),
+                        datasets: [{
+                            label: label,
+                            data: Array(30).fill(0),
+                            borderColor: color,
+                            backgroundColor: `${color}33`,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.4,
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { min: 0, max: 100, display: false },
+                            x: { display: false }
+                        },
+                        plugins: { legend: { display: false } },
+                        animation: { duration: 250 }
+                    }
+                });
+            };
 
-        function appendOutput(text, type = 'normal') {
-            const pre = document.createElement('pre');
-            if (type === 'error') pre.classList.add('error');
-            pre.innerHTML = sanitize(text); 
-            outputEl.appendChild(pre);
-            outputEl.scrollTop = outputEl.scrollHeight;
-        }
-
-        function appendStream(text) {
-            let lastPre = outputEl.querySelector('pre[data-stream-target="true"]');
-            if (!lastPre) {
-                lastPre = document.createElement('pre');
-                lastPre.dataset.streamTarget = 'true';
-                outputEl.appendChild(lastPre);
-            }
-            lastPre.textContent += text; 
-            outputEl.scrollTop = outputEl.scrollHeight;
-        }
-
-        function displayEnteredCommand(command) {
-            const promptHtml = `<div class="flex items-center text-sm">
-                <span class="prompt-user">user@vcc</span><span class="mx-1 text-[var(--fg-comment)]">:</span>
-                <span class="prompt-cwd">${sanitize(cwdEl.textContent)}</span><span class="mr-2">$</span>
-                <span>${sanitize(command)}</span></div>`;
-            outputEl.insertAdjacentHTML('beforeend', promptHtml);
-            outputEl.scrollTop = outputEl.scrollHeight;
-        }
-        
-        function toggleAiMode() {
-            isAiMode = !isAiMode;
-            aiToggleBtn.textContent = `AI Mode: ${isAiMode ? 'ON' : 'OFF'}`;
-            aiToggleBtn.classList.toggle('active', isAiMode);
-            inputEl.placeholder = isAiMode ? 'e.g., list all text files in detail' : '';
-            inputEl.focus();
-        }
-
-        function clearTerminal() {
-            outputEl.innerHTML = '';
-            appendOutput('Terminal cleared. Welcome back!');
-        }
-
-        function addToHistory(command) {
-            if (commandHistory[0] !== command) commandHistory.unshift(command);
-            if (commandHistory.length > 100) commandHistory.pop();
-            historyIndex = -1;
-        }
-
-        function navigateHistory(direction) {
-            const newIndex = historyIndex + direction;
-            if (newIndex >= 0 && newIndex < commandHistory.length) {
-                historyIndex = newIndex;
-                inputEl.value = commandHistory[historyIndex];
-            } else if (direction < 0) {
-                historyIndex = -1;
-                inputEl.value = '';
-            }
-        }
-
-        const createChart = (ctx) => {
-            return new Chart(ctx, {
-                type: 'line',
-                data: { labels: Array(30).fill(''), datasets: [{ data: Array(30).fill(0), borderColor: 'var(--accent-blue)', backgroundColor: 'rgba(122, 162, 247, 0.2)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0 }] },
-                options: { scales: { y: { beginAtZero: true, max: 100, ticks: { color: 'var(--fg-main)', font: { size: 10 } } }, x: { ticks: { display: false } } }, plugins: { legend: { display: false }, tooltip: { enabled: false } }, maintainAspectRatio: true }
-            });
-        };
-        const cpuChart = createChart(document.getElementById('cpuChart').getContext('2d'));
-        const memoryChart = createChart(document.getElementById('memoryChart').getContext('2d'));
-
-        function updateCharts(data) {
-            const update = (chart, value) => {
-                chart.data.labels.shift();
-                chart.data.labels.push('');
+            const cpuChart = createChart(document.getElementById('cpu-chart').getContext('2d'), 'CPU Usage', '#60a5fa');
+            const memChart = createChart(document.getElementById('mem-chart').getContext('2d'), 'Memory Usage', '#4ade80');
+            
+            const updateChart = (chart, value) => {
                 chart.data.datasets[0].data.shift();
                 chart.data.datasets[0].data.push(value);
-                chart.update('quiet');
+                chart.update();
             };
-            if (data.cpu !== undefined) update(cpuChart, data.cpu);
-            if (data.memory !== undefined) update(memoryChart, data.memory);
-        }
 
-        
-        function init() {
-            inputEl.disabled = true;
-            inputEl.placeholder = 'Connecting to server...';
-            const initialPre = document.createElement('pre');
-            initialPre.dataset.streamTarget = 'true';
-            outputEl.appendChild(initialPre);
-        }
+            socket.on('connect', () => {
+                addOutputLine('Connected to Visual Command Center backend.', 'text-green-400');
+            });
+            socket.on('connect_error', (err) => {
+                addOutputLine(`Connection failed: ${err.message}. Is the backend running?`, 'text-red-400');
+            });
+            socket.on('command_output', (data) => addOutput(data));
+            socket.on('command_error', (data) => addOutputLine(`Error: ${data}`, 'text-red-400'));
+            socket.on('command_done', () => input.disabled = false);
+            socket.on('cwd_update', (cwd) => cwdPrompt.textContent = cwd);
+            socket.on('system_stats', (stats) => {
+                document.getElementById('cpu-usage').textContent = `${stats.cpu.toFixed(1)}%`;
+                document.getElementById('mem-usage').textContent = `${stats.memory.toFixed(1)}%`;
+                updateChart(cpuChart, stats.cpu);
+                updateChart(memChart, stats.memory);
+            });
 
-        init();
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const command = input.value.trim();
+                    if (command) {
+                        addOutputLine(`${cwdPrompt.textContent} > ${command}`, 'text-gray-400');
+                        socket.emit('execute_command', { command: command, ai: isAiMode });
+                        commandHistory.push(command);
+                        historyIndex = commandHistory.length;
+                        input.value = '';
+                        input.disabled = true;
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (historyIndex > 0) {
+                        historyIndex--;
+                        input.value = commandHistory[historyIndex];
+                        input.setSelectionRange(input.value.length, input.value.length);
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (historyIndex < commandHistory.length - 1) {
+                        historyIndex++;
+                        input.value = commandHistory[historyIndex];
+                        input.setSelectionRange(input.value.length, input.value.length);
+                    } else {
+                        historyIndex = commandHistory.length;
+                        input.value = '';
+                    }
+                }
+            });
+
+            aiToggle.addEventListener('click', () => {
+                isAiMode = !isAiMode;
+                aiToggle.textContent = `AI Mode: ${isAiMode ? 'ON' : 'OFF'}`;
+                aiToggle.classList.toggle('bg-green-600', isAiMode);
+                aiToggle.classList.toggle('hover:bg-green-500', isAiMode);
+                aiToggle.classList.toggle('bg-gray-600', !isAiMode);
+                aiToggle.classList.toggle('hover:bg-gray-500', !isAiMode);
+                aiToggle.classList.toggle('ai-glow', isAiMode);
+            });
+
+            document.body.addEventListener('click', () => input.focus());
+
+            function addOutput(text) {
+                const pre = document.createElement('pre');
+                pre.className = 'whitespace-pre-wrap break-words';
+                pre.textContent = text;
+                output.appendChild(pre);
+                output.scrollTop = output.scrollHeight;
+            }
+
+            function addOutputLine(text, className = '') {
+                const line = document.createElement('div');
+                line.textContent = text;
+                if (className) line.className = className;
+                output.appendChild(line);
+                output.scrollTop = output.scrollHeight;
+            }
+        });
     </script>
 </body>
 </html>
